@@ -1,30 +1,61 @@
 .model small
 .stack 100h
 .data
-    byte_val db 0b10110010b ; Input byte
-    ones db 0               ; Counter for 1s
-    zeros db 0              ; Counter for 0s
+    num db 10110110b ; 8-bit binary number
+    ones db 0
+    zeros db 0
+
+    msg1 db 'Number of 1s: $'
+    msg2 db 13, 10, 'Number of 0s: $'
+
 .code
-start:
-    mov al, byte_val        ; Load byte into AL
-    mov cl, 8               ; Loop counter (8 bits)
-    mov bl, 0               ; Ones count
-    mov bh, 0               ; Zeros count
+main:
+    mov ax, @data
+    mov ds, ax
+
+    mov cx, 8          ; loop 8 times for 8 bits
+    mov al, num        ; load binary number into AL
 
 count_loop:
-    shr al, 1               ; Shift right, LSB -> CF
-    jnc is_zero
-    inc bl                  ; If CF=1, increment ones
+    ror al, 1          ; rotate right through carry
+    jc is_one          ; if carry is set, it's a 1
+    inc zeros
     jmp next
-is_zero:
-    inc bh                  ; If CF=0, increment zeros
+is_one:
+    inc ones
 next:
-    dec cl
-    jnz count_loop
+    loop count_loop
 
-    mov ones, bl
-    mov zeros, bh
-
-    mov ah, 4ch
+    ; Print "Number of 1s: "
+    lea dx, msg1
+    mov ah, 09h
     int 21h
-end start
+
+    ; Print ones count
+    mov al, ones
+    call print_digit
+
+    ; Print "Number of 0s: "
+    lea dx, msg2
+    mov ah, 09h
+    int 21h
+
+    ; Print zeros count
+    mov al, zeros
+    call print_digit
+
+    ; Exit to DOS
+    mov ah, 4Ch
+    int 21h
+
+;-----------------------------------
+; Print single digit number in AL
+;-----------------------------------
+print_digit:
+    add al, '0'
+    mov dl, al
+    mov ah, 02h
+    int 21h
+    ret
+
+end main
