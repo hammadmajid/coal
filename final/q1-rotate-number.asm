@@ -4,6 +4,7 @@ org 100h
 .data
     hex1 db 4 dup(?), '$'   ; buffer for original value
     hex2 db 4 dup(?), '$'   ; buffer for converted value
+    newline db 13, 10, '$'  ; for printing new line
 
 .code
     ; original number
@@ -15,10 +16,8 @@ org 100h
     int 21h
 
     ; newline
-    mov dl, 0Ah
-    mov ah, 02h
-    int 21h
-    mov dl, 0Dh
+    mov dl, newline
+    mov al, 09h
     int 21h
 
     ; rotate to get 6887h
